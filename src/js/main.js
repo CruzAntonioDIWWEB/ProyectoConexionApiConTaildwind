@@ -42,7 +42,8 @@ async function construirHTML(startIndex, endIndex) {
  let main = document.querySelector('main');
  let sectionCards = document.getElementById('sectionCards') || document.createElement('section');
  sectionCards.setAttribute('id', "sectionCards");
- sectionCards.setAttribute('class', 'pt-[150px] pb-[150px] max-w-[1600px] mx-auto ');
+ // Modificado para mostrar las tarjetas horizontalmente con flexbox y wrap
+ sectionCards.setAttribute('class', 'pt-20 pb-20 max-w-7xl mx-auto flex flex-wrap gap-6 justify-center');
 
  if (!document.getElementById('sectionCards')) {
     main.appendChild(sectionCards);
@@ -52,12 +53,17 @@ async function construirHTML(startIndex, endIndex) {
  let listaUsuarios = JSON.parse(localStorage.getItem('listaUsuarios'));
  let listaFotos = JSON.parse(localStorage.getItem('listaFotos'));
 
+ // Creamos una fila para el conjunto actual de tarjetas
+ let currentRow = document.createElement('div');
+ currentRow.setAttribute('class', 'flex flex-wrap gap-6 justify-center w-full');
+ sectionCards.appendChild(currentRow);
+
  for (let i = startIndex; i < endIndex && i < listaAlbums.length; i++) {
     let album = listaAlbums[i];
 
     //Creamos el contenedor principal de la tarjeta 
     let albumCard = document.createElement('div'); 
-    albumCard.setAttribute('class', 'group w-[300px] h-[300px] bg-transparent border border-[#f1f1f1] [perspective:1000px]');
+    albumCard.setAttribute('class', 'group w-72 h-72 bg-transparent border border-gray-200 rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300');
     
     //Contenedor Interior Giratorio
     let contenedorInterior = document.createElement('div');
@@ -68,21 +74,23 @@ async function construirHTML(startIndex, endIndex) {
     
     //Creamos la tarjeta frontal
     let tarjetaFrontal = document.createElement('div');
-    tarjetaFrontal.setAttribute('class', 'absolute w-full h-full bg-[#bbbbbb] text-black [backface-visibility:hidden]');
+    tarjetaFrontal.setAttribute('class', 'absolute w-full h-full bg-gray-200 text-black [backface-visibility:hidden]');
     let imagenAlbum = document.createElement('img');
-    imagenAlbum.setAttribute('class', 'w-[300px] h-[300px]');
+    imagenAlbum.setAttribute('class', 'w-full h-full object-cover');
     imagenAlbum.setAttribute('src', fotoAleatoria.url);
     imagenAlbum.setAttribute('alt', fotoAleatoria.id);
     tarjetaFrontal.appendChild(imagenAlbum);
 
     //Creamos la tarjeta trasera
     let tarjetaTrasera = document.createElement('div');
-    tarjetaTrasera.setAttribute('class', 'absolute w-full h-full bg-[#1e90ff] text-white [transform:rotateY(180deg)] [backface-visibility:hidden]');
+    tarjetaTrasera.setAttribute('class', 'absolute w-full h-full bg-blue-500 text-white [transform:rotateY(180deg)] [backface-visibility:hidden] flex flex-col items-center justify-center p-4');
     let tituloAlbum = document.createElement('h1');
+    tituloAlbum.setAttribute('class', 'text-xl font-bold mb-4 line-clamp-3');
     tituloAlbum.innerText = album.title;
 
     let autorAlbum = listaUsuarios.find(usuario => usuario.id == album.userId);
     let autor = document.createElement('p');
+    autor.setAttribute('class', 'text-sm');
     autor.innerText = "Autor: " + autorAlbum.name;
     tarjetaTrasera.appendChild(tituloAlbum);
     tarjetaTrasera.appendChild(autor);
@@ -107,11 +115,10 @@ function loadMoreItems() {
 }
 
 window.addEventListener('scroll', () => {
- if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+ if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
     loadMoreItems();
  }
 });
 
 // Inicializar la carga de los primeros 10 elementos
-
 construirHTML(0, batchSize);

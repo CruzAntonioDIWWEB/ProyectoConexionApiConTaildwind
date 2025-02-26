@@ -5,11 +5,22 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="./src/js/main.js" defer></script>
-    <title>Vite App</title>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            transitionProperty: {
+              'height': 'height',
+              'spacing': 'margin, padding',
+            }
+          }
+        }
+      }
+    </script>
+    <title>Galería de Álbumes</title>
   </head>
-  <body>
-    <header class="bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg">
+  <body class="bg-gray-100">
+    <header class="bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg fixed w-full z-10">
       <nav class="container mx-auto px-6 py-4">
         <ul class="flex justify-between items-center">
           <li>
@@ -25,8 +36,10 @@
         </ul>
       </nav>
     </header>
-    <main class="flex flex-col items-center justify-start min-h-screen">
+    <main class="flex flex-col items-center justify-start min-h-screen pt-20">
+      <!-- Aquí se añadirán las tarjetas dinámicamente -->
     </main>
-    <script src="../path/to/flowbite/dist/flowbite.min.js"></script>
+    
+    <script src="./src/js/main.js" defer></script>
   </body>
 </html>
