@@ -1,149 +1,138 @@
-import $ from 'jquery';
-
-let currentIndex = 0;
-const batchSize = 10;
-
-function obtenerAlbums() {
-    let listaCargada = localStorage.getItem('listaAlbumsJquery');
-
-    if (!listaCargada) {
-        let url = 'https://jsonplaceholder.typicode.com/albums';
-        $.ajax({
-            url: url,
-            method: 'GET'
-        }).done(function (response) {
-            localStorage.setItem('listaAlbumsJquery', JSON.stringify(response));
-            console.log('Álbumes cargados:', response);
-        }).fail(function (error) {
-            console.error('Error al cargar los álbumes:', error);
-        });
+async function obtenerAlbums() {
+    let listaCargada = localStorage.getItem('listaAlbums') || [];
+  
+    if (listaCargada.length == 0) {
+      $.ajax({
+        url: 'https://jsonplaceholder.typicode.com/albums',
+        method: 'GET',
+        success: function(json) {
+          localStorage.setItem('listaAlbums', JSON.stringify(json));
+          console.log('Albums cargados' + localStorage.getItem('listaAlbums'));
+        }
+      });
     } else {
-        console.log('No hace falta volver a cargar la petición');
-        console.log('Álbumes en localStorage:', JSON.parse(listaCargada));
+      console.log('No hace falta volver a cargar la petición');
     }
-}
-
-function obternerUsuarios() {
-    let listaCargada = localStorage.getItem('listaUsuariosJquery');
-
-    if (!listaCargada) {
-        let url = 'https://jsonplaceholder.typicode.com/users';
-        $.ajax({
-            url: url,
-            method: 'GET'
-        }).done(function (response) {
-            localStorage.setItem('listaUsuariosJquery', JSON.stringify(response));
-            console.log('Álbumes cargados:', response);
-        }).fail(function (error) {
-            console.error('Error al cargar los álbumes:', error);
-        });
-    } else {
-        console.log('No hace falta volver a cargar la petición');
-        console.log('Álbumes en localStorage:', JSON.parse(listaCargada));
-    }
+  }
+  
+  async function obtenerUsuarios() {
+    let listaCargada = localStorage.getItem('listaUsuarios') || [];
     
-}
-
-function obtenerFotos() {
-    let listaCargada = localStorage.getItem('listaFotosJquery');
-    if (!listaCargada) {
-        let url = 'https://api.thecatapi.com/v1/images/search?limit=100&api_key=live_i99DweF5QsCH8LT0cxcX1uBPgiPupixOgqtt83VXfDXdViIrr9pCVt27GKSMmrPU'
-        $.ajax({
-            url: url,
-            method: 'GET'
-        }).done(function (response) {
-            localStorage.setItem('listaFotosJquery', JSON.stringify(response));
-            console.log('Fotos cargadas:', response);
-        }).fail(function (error) {
-            console.error('Error al cargar las fotos:', error);
-        });
+    if (listaCargada.length == 0) {
+      $.ajax({
+        url: 'https://jsonplaceholder.typicode.com/users',
+        method: 'GET',
+        success: function(json) {
+          localStorage.setItem('listaUsuarios', JSON.stringify(json));
+          console.log('Usuarios cargados' + localStorage.getItem('listaUsuarios'));
+        }
+      });
     } else {
-        console.log('No hace falta volver a cargar la petición');
-        console.log('Fotos en localStorage:', JSON.parse(listaCargada));
+      console.log('No hace falta volver a cargar la petición');
     }
-}
-
-async function construirHTML(startIndex, endIndex) {
-    obtenerAlbums();
-    obternerUsuarios();
-    obtenerFotos();
- 
-    let $main = $('main');
-    let $sectionCards = $('#sectionCards');
- 
-    // Si no existe la sección, la creamos y la añadimos al main
-    if ($sectionCards.length === 0) {
-       $sectionCards = $('<section>', {
+  }
+  
+  async function obternerFotos() {
+    let listaCargada = localStorage.getItem('listaFotos') || [];
+    
+    if (listaCargada.length == 0) {
+      $.ajax({
+        url: 'https://api.thecatapi.com/v1/images/search?limit=100&api_key=live_l0pN2g1nkzCwC2h8VPomzLeG3dHNAuEb5lTgIG9qIFZkZehGRo8tihgevzbyRfV2',
+        method: 'GET',
+        success: function(json) {
+          localStorage.setItem('listaFotos', JSON.stringify(json));
+          console.log('Fotos cargadas' + localStorage.getItem('listaFotos'));
+        }
+      });
+    } else {
+      console.log('No hace falta volver a cargar la petición');
+    }
+  }
+  
+  async function construirHTML(startIndex, endIndex) {
+    $.when(
+      obtenerAlbums(),
+      obtenerUsuarios(),
+      obternerFotos()
+    ).done(function() {
+      // Check if section exists, create if not
+      if ($('#sectionCards').length === 0) {
+        $('<section>', {
           id: 'sectionCards',
-          class: 'pt-[150px] pb-[150px] max-w-[1600px] mx-auto'
-       });
-       $main.append($sectionCards);
-    }
- 
-    let listaAlbums = JSON.parse(localStorage.getItem('listaAlbumsJquery'));
-    let listaUsuarios = JSON.parse(localStorage.getItem('listaUsuariosJquery'));
-    let listaFotos = JSON.parse(localStorage.getItem('listaFotosJquery'));
- 
-    for (let i = startIndex; i < endIndex && i < listaAlbums.length; i++) {
-       let album = listaAlbums[i];
- 
-       // Creamos el contenedor principal de la tarjeta
-       let $albumCard = $('<div>', {
+          class: 'pt-[150px] pb-[150px] max-w-[1600px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 min-h-screen'
+        }).appendTo('main');
+      }
+      
+      // Get data from localStorage using jQuery
+      const listaAlbums = $.parseJSON(localStorage.getItem('listaAlbums'));
+      const listaUsuarios = $.parseJSON(localStorage.getItem('listaUsuarios'));
+      const listaFotos = $.parseJSON(localStorage.getItem('listaFotos'));
+      
+      // Loop through items
+      $.each(listaAlbums.slice(startIndex, endIndex), function(i, album) {
+        // Get random photo
+        const fotoAleatoria = listaFotos[Math.floor(Math.random() * listaFotos.length)];
+        
+        // Find autor
+        const autorAlbum = $.grep(listaUsuarios, function(usuario) {
+          return usuario.id == album.userId;
+        })[0];
+        
+        // Create card structure
+        $('<div>', {
           class: 'group w-[300px] h-[300px] bg-transparent border border-[#f1f1f1] [perspective:1000px]'
-       });
- 
-       // Contenedor interior giratorio
-       let $contenedorInterior = $('<div>', {
-          class: 'relative w-full h-full text-center transition-transform duration-[1000ms] [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]'
-       });
- 
-       // Cogemos una foto aleatoria de este álbum
-       let fotoAleatoria = listaFotos[Math.floor(Math.random() * listaFotos.length)];
- 
-       // Creamos la tarjeta frontal
-       let $tarjetaFrontal = $('<div>', {
-          class: 'absolute w-full h-full bg-[#bbbbbb] text-black [backface-visibility:hidden]'
-       });
-       let $imagenAlbum = $('<img>', {
-          class: 'w-[300px] h-[300px]',
-          src: fotoAleatoria.url,
-          alt: fotoAleatoria.id
-       });
-       $tarjetaFrontal.append($imagenAlbum);
- 
-       // Creamos la tarjeta trasera
-       let $tarjetaTrasera = $('<div>', {
-          class: 'absolute w-full h-full bg-[#1e90ff] text-white [transform:rotateY(180deg)] [backface-visibility:hidden]'
-       });
-       let $tituloAlbum = $('<h1>').text(album.title);
- 
-       let autorAlbum = listaUsuarios.find(usuario => usuario.id == album.userId);
-       let $autor = $('<p>').text("Autor: " + autorAlbum.name);
-       $tarjetaTrasera.append($tituloAlbum).append($autor);
- 
-       // Añadimos las tarjetas al contenedor interior
-       $contenedorInterior.append($tarjetaFrontal).append($tarjetaTrasera);
- 
-       // Añadimos el contenedor interior a la tarjeta principal
-       $albumCard.append($contenedorInterior);
- 
-       // Añadimos la tarjeta principal a la sección
-       $sectionCards.append($albumCard);
-    }
- 
-    currentIndex = endIndex;
- }
-
- function loadMoreItems() {
+        }).append(
+          $('<div>', {
+            class: 'relative w-full h-full text-center transition-transform duration-[1000ms] [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]'
+          }).append(
+            // Front of card
+            $('<div>', {
+              class: 'absolute w-full h-full bg-[#bbbbbb] text-black [backface-visibility:hidden]'
+            }).append(
+              $('<img>', {
+                class: 'w-[300px] h-[300px]',
+                src: fotoAleatoria.url,
+                alt: fotoAleatoria.id
+              })
+            ),
+            // Back of card
+            $('<div>', {
+              class: 'absolute w-full h-full bg-[#1e90ff] text-white [transform:rotateY(180deg)] [backface-visibility:hidden]'
+            }).append(
+              $('<h1>').text(album.title),
+              $('<p>').text("Autor: " + autorAlbum.name)
+            )
+          )
+        ).appendTo('#sectionCards');
+      });
+      
+      currentIndex = endIndex;
+    });
+  }
+  
+  let currentIndex = 0;
+  const batchSize = 12;
+  
+  function loadMoreItems() {
     const nextIndex = currentIndex + batchSize;
     construirHTML(currentIndex, nextIndex);
- }
- 
- $(window).on('scroll', function () {
-    if ($(window).innerHeight() + $(window).scrollTop() >= $(document).height()) {
-       loadMoreItems();
+  }
+  
+  $(window).on('scroll', function() {
+    const nearBottom = $(window).scrollTop() + $(window).height() >= $(document).height() - 100;
+    const contentTooShort = $(document).height() < $(window).height();
+  
+    if (nearBottom || contentTooShort) {
+      loadMoreItems();
     }
- });
-
- construirHTML(0, batchSize);
-
+  });
+  
+  $(window).on('load', function() {
+    if ($(document).height() < $(window).height()) {
+      loadMoreItems();
+    }
+  });
+  
+  $(document).ready(function() {
+    construirHTML(0, batchSize);
+  });
